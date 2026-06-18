@@ -1,8 +1,19 @@
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png">
+  <img alt="opencodex" src="assets/logo-light.png" width="96" height="96">
+</picture>
+
 # opencodex (`ocx`)
 
 **Universal provider proxy for [OpenAI Codex](https://openai.com/codex) — use any LLM with Codex CLI, App, and SDK.**
 
+[English](README.md) · [한국어](README.ko.md) · [简体中文](README.zh-CN.md)
+
 📖 **[Full documentation →](https://lidge-jun.github.io/opencodex/)**
+
+</div>
 
 Codex only speaks the Responses API (`/v1/responses`). opencodex sits between Codex and your LLM
 provider, translating the protocol on the fly — streaming, tool calls, reasoning, and images included
