@@ -37,6 +37,8 @@ export function planWebSearch(
   parsed: OcxParsedRequest,
   isPassthrough: boolean,
   incomingHeaders: Headers,
+  provider: OcxProviderConfig,
+  modelId: string,
 ): SidecarPlan | undefined {
   if (!parsed._webSearch || isPassthrough) return undefined;
   const cfg = config.webSearchSidecar ?? {};
@@ -51,6 +53,8 @@ export function planWebSearch(
       model: cfg.model ?? DEFAULT_SIDECAR_MODEL,
       reasoning: cfg.reasoning ?? DEFAULT_SIDECAR_REASONING,
       timeoutMs: cfg.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+      // The routed model is text-only → have the search model verbalize image results.
+      describeImages: !!provider.noVisionModels?.includes(modelId),
     },
     maxSearches: cfg.maxSearchesPerTurn ?? DEFAULT_MAX_SEARCHES,
   };

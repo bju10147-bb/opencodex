@@ -6,7 +6,20 @@ export interface SidecarSettings {
   model: string;
   reasoning: string;
   timeoutMs: number;
+  /**
+   * True when the routed (downstream) model is text-only. The search model CAN see images, so it's
+   * told to verbalize any relevant image results and include their URLs — otherwise a non-vision model
+   * would receive bare image links it cannot interpret (the image-web-search gap).
+   */
+  describeImages?: boolean;
 }
+
+const BASE_INSTRUCTION =
+  "You are a web-search assistant. Use the web_search tool to find current information for the " +
+  "user's query, then reply with a concise, factual answer and cite the sources you used.";
+const IMAGE_INSTRUCTION =
+  " The model that will read your answer is TEXT-ONLY and cannot see images: if the results include " +
+  "relevant images, describe what they show in words and include their source URLs in your answer.";
 
 /** Bound the sidecar's answer length upstream (the tool_result is also clamped downstream). */
 const SIDECAR_MAX_OUTPUT_TOKENS = 1500;
@@ -35,9 +48,7 @@ export async function runWebSearch(
   }
   const body = {
     model: settings.model,
-    instructions:
-      "You are a web-search assistant. Use the web_search tool to find current information for the " +
-      "user's query, then reply with a concise, factual answer and cite the sources you used.",
+    instructions: settings.describeImages ? BASE_INSTRUCTION + IMAGE_INSTRUCTION : BASE_INSTRUCTION,
     input: [{ type: "message", role: "user", content: [{ type: "input_text", text: query }] }],
     tools: [hostedTool],
     tool_choice: "auto",

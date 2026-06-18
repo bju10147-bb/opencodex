@@ -159,7 +159,7 @@ async function handleResponses(req: Request, config: OcxConfig, logCtx: { model:
   // Web-search sidecar: Codex enabled web_search but this is a routed (non-OpenAI) model that can't
   // run it server-side. Expose web_search as a function tool and run searches via the gpt-mini sidecar
   // through the ChatGPT passthrough, looping until the model answers. Otherwise take the normal path.
-  const wsPlan = planWebSearch(config, parsed, false, req.headers);
+  const wsPlan = planWebSearch(config, parsed, false, req.headers, route.provider, route.modelId);
   if (wsPlan) {
     parsed.context.tools = [...(parsed.context.tools ?? []), buildWebSearchTool()];
     return runWithWebSearch({
