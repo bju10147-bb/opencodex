@@ -80,12 +80,17 @@ function messagesToAnthropicFormat(parsed: OcxParsedRequest, isOAuth: boolean): 
         break;
       }
       case "toolResult": {
+        // Anthropic tool_result accepts a string OR content blocks — render images natively
+        // (e.g. Codex view_image output) instead of dropping them.
+        const trContent = typeof msg.content === "string"
+          ? msg.content
+          : (msg.content as OcxContentPart[]).map(toAnthropicContentPart);
         messages.push({
           role: "user",
           content: [{
             type: "tool_result",
             tool_use_id: msg.toolCallId,
-            content: msg.content,
+            content: trContent,
           }],
         });
         break;

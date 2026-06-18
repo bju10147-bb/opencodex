@@ -14,10 +14,14 @@ function findForwardProvider(config: OcxConfig): OcxProviderConfig | undefined {
   return undefined;
 }
 
+/** A user/developer/toolResult message can carry images (toolResult: e.g. Codex view_image output). */
+function carriesImages(role: string): boolean {
+  return role === "user" || role === "developer" || role === "toolResult";
+}
+
 function messagesHaveImage(parsed: OcxParsedRequest): boolean {
   return parsed.context.messages.some(m =>
-    (m.role === "user" || m.role === "developer") &&
-    Array.isArray(m.content) && (m.content as OcxContentPart[]).some(p => p.type === "image"));
+    carriesImages(m.role) && Array.isArray(m.content) && (m.content as OcxContentPart[]).some(p => p.type === "image"));
 }
 
 export interface VisionPlan {
@@ -63,7 +67,7 @@ export async function describeImagesInPlace(
   settings: VisionSettings,
 ): Promise<void> {
   for (const msg of parsed.context.messages) {
-    if ((msg.role !== "user" && msg.role !== "developer") || !Array.isArray(msg.content)) continue;
+    if (!carriesImages(msg.role) || !Array.isArray(msg.content)) continue;
     const parts = msg.content as OcxContentPart[];
     if (!parts.some(p => p.type === "image")) continue;
     const contextText = parts

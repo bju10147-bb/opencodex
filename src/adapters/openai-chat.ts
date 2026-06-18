@@ -1,6 +1,7 @@
 import type { ProviderAdapter } from "./base";
 import type { AdapterEvent, OcxAssistantMessage, OcxContentPart, OcxMessage, OcxParsedRequest, OcxProviderConfig, OcxTextContent, OcxToolCall } from "../types";
 import { namespacedToolName } from "../types";
+import { contentPartsToText } from "./image";
 
 function messagesToChatFormat(parsed: OcxParsedRequest): unknown[] {
   const out: unknown[] = [];
@@ -65,7 +66,7 @@ function messagesToChatFormat(parsed: OcxParsedRequest): unknown[] {
         out.push({
           role: "tool",
           tool_call_id: msg.toolCallId,
-          content: msg.content,
+          content: contentPartsToText(msg.content),
         });
         break;
       }

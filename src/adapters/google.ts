@@ -8,7 +8,7 @@ import type {
   OcxTextContent,
   OcxToolCall,
 } from "../types";
-import { parseDataUrl } from "./image";
+import { contentPartsToText, parseDataUrl } from "./image";
 
 function messagesToGeminiFormat(parsed: OcxParsedRequest): { systemInstruction?: unknown; contents: unknown[] } {
   const systemInstruction = parsed.context.systemPrompt?.length
@@ -53,7 +53,7 @@ function messagesToGeminiFormat(parsed: OcxParsedRequest): { systemInstruction?:
       case "toolResult": {
         contents.push({
           role: "user",
-          parts: [{ functionResponse: { name: msg.toolName, response: { result: msg.content } } }],
+          parts: [{ functionResponse: { name: msg.toolName, response: { result: contentPartsToText(msg.content) } } }],
         });
         break;
       }

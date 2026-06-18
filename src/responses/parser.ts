@@ -145,17 +145,29 @@ function ensureAssistantPlaceholder(messages: OcxMessage[], modelId: string, now
   return placeholder;
 }
 
-function flattenOutputArray(blocks: readonly unknown[]): string {
-  const parts: string[] = [];
-  for (const raw of blocks) {
+/**
+ * Tool-call output content. Preserves images (e.g. Codex `view_image` returns
+ * `input_image` items): returns content parts when any image is present, else a plain joined string.
+ * Never inlines an image_url as text (that would explode the token count).
+ */
+function outputToToolResultContent(output: string | unknown[] | undefined): string | OcxContentPart[] {
+  if (typeof output === "string") return output;
+  if (!Array.isArray(output)) return "";
+  const parts: OcxContentPart[] = [];
+  let hasImage = false;
+  for (const raw of output) {
     if (!isObj(raw)) continue;
     if (raw.type === "output_text" || raw.type === "text") {
-      if (typeof raw.text === "string") parts.push(raw.text);
-    } else if (raw.type === "refusal") {
-      if (typeof raw.refusal === "string") parts.push(`[refusal: ${raw.refusal}]`);
+      if (typeof raw.text === "string") parts.push({ type: "text", text: raw.text });
+    } else if (raw.type === "refusal" && typeof raw.refusal === "string") {
+      parts.push({ type: "text", text: `[refusal: ${raw.refusal}]` });
+    } else if (raw.type === "input_image" && typeof raw.image_url === "string") {
+      parts.push({ type: "image", imageUrl: raw.image_url, ...(typeof raw.detail === "string" ? { detail: raw.detail } : {}) });
+      hasImage = true;
     }
   }
-  return parts.join("");
+  if (!hasImage) return parts.map(p => (p.type === "text" ? p.text : "")).join("");
+  return parts;
 }
 
 function findToolNameById(messages: OcxMessage[], callId: string): string {
@@ -308,13 +320,10 @@ export function parseRequest(body: unknown): OcxParsedRequest {
 
       if (effectiveType === "function_call_output") {
         const output = item as { call_id: string; output?: string | unknown[] };
-        const text = typeof output.output === "string"
-          ? output.output
-          : Array.isArray(output.output) ? flattenOutputArray(output.output) : "";
         messages.push({
           role: "toolResult", toolCallId: output.call_id,
           toolName: findToolNameById(messages, output.call_id),
-          content: text, isError: false, timestamp: now,
+          content: outputToToolResultContent(output.output), isError: false, timestamp: now,
         });
         continue;
       }
