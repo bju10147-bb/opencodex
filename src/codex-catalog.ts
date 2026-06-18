@@ -140,6 +140,23 @@ export async function gatherRoutedModels(config: OcxConfig): Promise<CatalogMode
 }
 
 /**
+ * Reorder routed models so the configured subagent picks come FIRST (in the chosen order).
+ * Codex's spawn_agent advertises only the first 5 routed catalog entries, so putting the chosen
+ * ones first makes exactly them appear as overrides. Non-featured keep their relative order (stable
+ * sort) and stay visibility:"list" — so they remain in the main /model picker and callable by name.
+ */
+export function orderForSubagents(goModels: CatalogModel[], featured?: string[]): CatalogModel[] {
+  if (!featured || featured.length === 0) return goModels;
+  const rank = new Map(featured.map((id, i) => [id, i]));
+  const keyOf = (m: CatalogModel) => `${m.provider}/${m.id}`;
+  return [...goModels].sort((a, b) => {
+    const ra = rank.has(keyOf(a)) ? rank.get(keyOf(a))! : Number.MAX_SAFE_INTEGER;
+    const rb = rank.has(keyOf(b)) ? rank.get(keyOf(b))! : Number.MAX_SAFE_INTEGER;
+    return ra - rb;
+  });
+}
+
+/**
  * Merge namespaced routed-model entries into the on-disk Codex catalog.
  * Idempotent + non-destructive:
  *  - native entries (slug without "/") are preserved untouched,
@@ -160,7 +177,8 @@ export async function syncCatalogModels(config: OcxConfig): Promise<{ added: num
   const goModels = await gatherRoutedModels(config);
   if (goModels.length === 0) return { added: 0, path: catalogPath };
 
-  const goEntries = buildCatalogEntries(template ? JSON.parse(JSON.stringify(template)) : null, [], goModels);
+  const orderedGoModels = orderForSubagents(goModels, config.subagentModels);
+  const goEntries = buildCatalogEntries(template ? JSON.parse(JSON.stringify(template)) : null, [], orderedGoModels);
   // Keep genuine native entries (gpt-*, codex-*), but drop bare duplicates of routed models —
   // they're replaced by the namespaced, identity-corrected entries — plus any prior "/" entries.
   const goIds = new Set(goModels.map(m => m.id));

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import Dashboard from "./pages/Dashboard";
 import Providers from "./pages/Providers";
+import Subagents from "./pages/Subagents";
 import Logs from "./pages/Logs";
 
-type Page = "dashboard" | "providers" | "logs";
+type Page = "dashboard" | "providers" | "subagents" | "logs";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
 
@@ -31,10 +32,12 @@ export default function App() {
       <nav style={{ display: "flex", gap: 4, borderBottom: "1px solid #e5e7eb", marginBottom: 24 }}>
         {navBtn("dashboard", "Dashboard")}
         {navBtn("providers", "Providers")}
+        {navBtn("subagents", "Subagents")}
         {navBtn("logs", "Logs")}
       </nav>
       {page === "dashboard" && <Dashboard apiBase={API_BASE} />}
       {page === "providers" && <Providers apiBase={API_BASE} />}
+      {page === "subagents" && <Subagents apiBase={API_BASE} />}
       {page === "logs" && <Logs apiBase={API_BASE} />}
     </div>
   );

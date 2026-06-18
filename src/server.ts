@@ -304,6 +304,23 @@ async function handleManagementAPI(req: Request, url: URL, config: OcxConfig): P
     return jsonResponse({ providers: listKeyLoginProviders() });
   }
 
+  // Subagent model picker: which ≤5 routed models Codex's spawn_agent advertises (it shows the
+  // first 5 routed catalog entries). PUT reorders the injected catalog so the chosen ones lead.
+  if (url.pathname === "/api/subagent-models" && req.method === "GET") {
+    const models = await fetchAllModels(config);
+    return jsonResponse({ chosen: config.subagentModels ?? [], available: models.map(m => `${m.provider}/${m.id}`) });
+  }
+  if (url.pathname === "/api/subagent-models" && req.method === "PUT") {
+    let body: { models?: unknown };
+    try { body = await req.json(); } catch { return jsonResponse({ error: "invalid JSON body" }, 400); }
+    const chosen = Array.isArray(body.models) ? body.models.filter((m): m is string => typeof m === "string").slice(0, 5) : [];
+    config.subagentModels = chosen;
+    const { saveConfig: save } = await import("./config");
+    save(config);
+    try { const { syncCatalogModels } = await import("./codex-catalog"); await syncCatalogModels(config); } catch { /* catalog absent */ }
+    return jsonResponse({ ok: true, applied: chosen });
+  }
+
   // OAuth login (xai now; anthropic/kimi in cycle 2). Starts the flow and returns the auth URL;
   // the provider's loopback callback server (inside this process) captures the redirect in the
   // background, then the credential is persisted. The GUI opens the URL and polls /api/oauth/status.
@@ -384,16 +401,17 @@ export function startServer(port?: number) {
 
       if (url.pathname === "/v1/models" && req.method === "GET") {
         const goModels = await fetchAllModels(config);
-        const { buildCatalogEntries, loadCatalogTemplate, NATIVE_OPENAI_MODELS } = await import("./codex-catalog");
+        const { buildCatalogEntries, loadCatalogTemplate, NATIVE_OPENAI_MODELS, orderForSubagents } = await import("./codex-catalog");
+        const goOrdered = orderForSubagents(goModels, config.subagentModels);
         if (url.searchParams.has("client_version")) {
           // Codex client → Codex catalog shape: native gpt + namespaced routed models,
           // cloned from a native template so required fields (base_instructions, etc.) are present.
-          return jsonResponse({ models: buildCatalogEntries(loadCatalogTemplate(), NATIVE_OPENAI_MODELS, goModels) });
+          return jsonResponse({ models: buildCatalogEntries(loadCatalogTemplate(), NATIVE_OPENAI_MODELS, goOrdered) });
         }
         // OpenAI list shape: native gpt bare + routed models namespaced "<provider>/<id>"
         const data = [
           ...NATIVE_OPENAI_MODELS.map(id => ({ id, object: "model", created: 0, owned_by: "openai" })),
-          ...goModels.map(m => ({ id: `${m.provider}/${m.id}`, object: "model", created: 0, owned_by: m.owned_by ?? m.provider })),
+          ...goOrdered.map(m => ({ id: `${m.provider}/${m.id}`, object: "model", created: 0, owned_by: m.owned_by ?? m.provider })),
         ];
         return jsonResponse({ object: "list", data });
       }

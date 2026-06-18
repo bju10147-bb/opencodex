@@ -126,6 +126,11 @@ export interface OcxConfig {
   port: number;
   providers: Record<string, OcxProviderConfig>;
   defaultProvider: string;
+  /**
+   * Up to 5 routed model ids ("<provider>/<model>") to feature FIRST in the injected Codex catalog.
+   * Codex's spawn_agent only advertises the first 5 routed models, so this picks which 5 appear.
+   */
+  subagentModels?: string[];
 }
 
 export interface OcxProviderConfig {
