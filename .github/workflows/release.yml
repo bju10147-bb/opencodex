@@ -26,7 +26,7 @@ on:
         default: true
 
 permissions:
-  contents: read
+  contents: write # create the matching GitHub Release + version tag after npm publish
   id-token: write # OIDC auth for Trusted Publishing + automatic provenance attestation
 
 concurrency:
@@ -40,6 +40,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # opencodex is bun-native (the prepublishOnly GUI build + typecheck run under bun).
       - name: Setup Bun
@@ -102,3 +104,65 @@ jobs:
           echo "::error::npm registry smoke failed after 30 attempts"
           npm view @bitkyc08/opencodex versions dist-tags --json || true
           exit 1
+
+      - name: Create GitHub release
+        if: ${{ inputs.dry-run != true }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+          NPM_DIST_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          release_tag="v${RELEASE_VERSION}"
+          notes_file="$(mktemp)"
+
+          git fetch --force --tags origin
+
+          existing_tag_sha="$(git rev-parse -q --verify "refs/tags/${release_tag}^{commit}" || true)"
+          if [ -n "$existing_tag_sha" ] && [ "$existing_tag_sha" != "$GITHUB_SHA" ]; then
+            echo "::error::${release_tag} already points at ${existing_tag_sha}, not ${GITHUB_SHA}"
+            exit 1
+          fi
+
+          previous_tag="$(
+            git tag --merged HEAD --list 'v[0-9]*' --sort=-v:refname |
+              grep -vx "$release_tag" |
+              head -n 1 || true
+          )"
+
+          {
+            echo "Published to npm as \`@bitkyc08/opencodex@${RELEASE_VERSION}\` with dist-tag \`${NPM_DIST_TAG}\`."
+            echo
+            echo "## Commit log"
+            echo
+            if [ -n "$previous_tag" ]; then
+              echo "Changes since \`${previous_tag}\`:"
+              echo
+              git log --reverse --no-merges --pretty=format:'- %s (%h)' "${previous_tag}..HEAD" |
+                grep -vE '^- release: v[0-9]+\.[0-9]+\.[0-9]+' || true
+              echo
+              echo
+              echo "[Full diff](https://github.com/${GITHUB_REPOSITORY}/compare/${previous_tag}...${release_tag})"
+            else
+              echo "Initial release commits:"
+              echo
+              git log --reverse --no-merges --pretty=format:'- %s (%h)' HEAD |
+                grep -vE '^- release: v[0-9]+\.[0-9]+\.[0-9]+' || true
+            fi
+          } > "$notes_file"
+
+          if ! grep -q '^- ' "$notes_file"; then
+            printf '\n- Release version bump only.\n' >> "$notes_file"
+          fi
+
+          if [ -z "$existing_tag_sha" ]; then
+            git tag "$release_tag" "$GITHUB_SHA"
+            git push origin "refs/tags/${release_tag}"
+          fi
+
+          if gh release view "$release_tag" >/dev/null 2>&1; then
+            gh release edit "$release_tag" --title "$release_tag" --notes-file "$notes_file"
+          else
+            gh release create "$release_tag" --target "$GITHUB_SHA" --title "$release_tag" --notes-file "$notes_file"
+          fi

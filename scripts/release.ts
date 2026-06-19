@@ -45,7 +45,7 @@ if ((await $`git status --porcelain`.text()).trim()) { console.error("✗ workin
 console.log("→ typecheck");
 await $`bun x tsc --noEmit`;
 
-// 2. Bump package.json (no git tag — the workflow verifies against this version).
+// 2. Bump package.json only; the workflow creates the version tag after npm publish.
 console.log(`→ bump package.json → ${version}`);
 await $`npm version ${version} --no-git-tag-version`;
 
