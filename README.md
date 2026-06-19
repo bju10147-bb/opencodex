@@ -30,6 +30,16 @@ Codex CLI / App / SDK ──/v1/responses──▶ opencodex ──▶ Any provi
               OpenRouter · Azure · DeepSeek · GLM · …and OpenAI itself
 ```
 
+## Supported platforms
+
+| OS | Status | Service manager |
+|---|---|---|
+| macOS (arm64 / x64) | Fully supported | launchd |
+| Linux (x64 / arm64) | Fully supported | systemd (user unit) |
+| Windows (x64) | Fully supported | Task Scheduler |
+
+Requires [Bun](https://bun.sh) 1.1+. All three platforms work natively (no WSL needed on Windows).
+
 ## Quick start
 
 ```bash
@@ -110,7 +120,7 @@ ocx status                     # is the proxy running?
 ocx login <xai|anthropic|kimi> # OAuth login
 ocx logout <provider>          # remove a stored login
 ocx gui                        # open the web dashboard
-ocx service <install|start|stop|status|uninstall>   # run as a background service
+ocx service <install|start|stop|status|uninstall>   # background service (launchd/systemd/schtasks)
 ocx update                     # update opencodex to the latest published version
 ```
 

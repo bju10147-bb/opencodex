@@ -84,11 +84,22 @@ function handleStart() {
   process.on("SIGTERM", shutdown);
 }
 
+function killProxy(pid: number): void {
+  if (process.platform === "win32") {
+    try {
+      (require("node:child_process") as typeof import("node:child_process"))
+        .execSync(`taskkill /PID ${pid} /T /F`, { stdio: "pipe" });
+    } catch { /* process already gone */ }
+  } else {
+    process.kill(pid, "SIGTERM");
+  }
+}
+
 function handleStop() {
   const pid = readPid();
   if (pid) {
     try {
-      process.kill(pid, "SIGTERM");
+      killProxy(pid);
       console.log(`✅ Proxy (PID ${pid}) stopped.`);
     } catch {
       console.log("Proxy process not found.");

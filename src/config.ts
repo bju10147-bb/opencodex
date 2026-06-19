@@ -94,7 +94,13 @@ export function readPid(): number | null {
     const raw = readFileSync(PID_PATH, "utf-8").trim();
     const pid = parseInt(raw, 10);
     if (isNaN(pid)) return null;
-    try { process.kill(pid, 0); return pid; } catch { return null; }
+    try {
+      process.kill(pid, 0);
+      return pid;
+    } catch (e: unknown) {
+      if ((e as NodeJS.ErrnoException).code === "EPERM") return pid;
+      return null;
+    }
   } catch {
     return null;
   }
