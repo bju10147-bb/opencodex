@@ -50,6 +50,7 @@ export default defineConfig({
             { label: "Providers", translations: { ko: "프로바이더", "zh-CN": "提供商" }, slug: "guides/providers" },
             { label: "Model Routing", translations: { ko: "모델 라우팅", "zh-CN": "模型路由" }, slug: "guides/model-routing" },
             { label: "Codex Integration", translations: { ko: "Codex 통합", "zh-CN": "Codex 集成" }, slug: "guides/codex-integration" },
+            { label: "Codex App Model Picker", translations: { ko: "Codex App 모델 선택기", "zh-CN": "Codex App 模型选择器" }, slug: "guides/codex-app-models" },
             { label: "Sidecars: Web Search & Vision", translations: { ko: "사이드카: 웹 검색 & 비전", "zh-CN": "边车：网络搜索与视觉" }, slug: "guides/sidecars" },
             { label: "Web Dashboard", translations: { ko: "웹 대시보드", "zh-CN": "网页控制台" }, slug: "guides/web-dashboard" },
           ],

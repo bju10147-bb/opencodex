@@ -16,7 +16,7 @@ default (a single `openai` forward provider).
 | `defaultProvider` | `string` | `"openai"` | Provider used when routing finds no better match. |
 | `subagentModels?` | `string[]` | — | Up to 5 `provider/model` ids featured first in Codex's subagent picker. |
 | `disabledModels?` | `string[]` | — | Routed `provider/model` ids hidden from Codex (excluded from the catalog and `/v1/models`). |
-| `websockets?` | `boolean` | `true` | Advertise `supports_websockets` so Codex uses the Responses WebSocket path; set `false` to force HTTP/SSE. |
+| `websockets?` | `boolean` | `false` | Advertise `supports_websockets` so Codex uses the Responses WebSocket path. Omit or set `false` to keep HTTP/SSE. |
 | `modelCacheTtlMs?` | `number` | `300000` | Freshness window for the per-provider `/models` cache (5 min). |
 | `webSearchSidecar?` | `OcxWebSearchSidecarConfig` | on | Web-search sidecar options (see below). |
 | `visionSidecar?` | `OcxVisionSidecarConfig` | on | Vision sidecar options (see below). |
@@ -83,7 +83,7 @@ default (a single `openai` forward provider).
   },
   "subagentModels": ["anthropic/claude-opus-4-8", "ollama-cloud/glm-5.2"],
   "disabledModels": [],
-  "websockets": true,
+  "websockets": false,
   "webSearchSidecar": { "maxSearchesPerTurn": 3 },
   "visionSidecar": { "enabled": true }
 }

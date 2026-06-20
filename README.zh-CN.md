@@ -77,8 +77,13 @@ codex -m "ollama-cloud/glm-5.2"      "Write a SQL migration"
 - **OAuth、API key 或 ChatGPT 转发（forward）。** 用你的 xAI / Anthropic / Kimi 账户登录（token
   自动刷新）、转发你的 `codex login`，或直接粘贴一个 key（支持 `${ENV_VARS}`）。内置一份 18 家 provider 的
   API-key 目录（含 **Ollama Cloud**）。
-- **无缝接入 Codex。** 向 `$CODEX_HOME/config.toml`（默认 `~/.codex/config.toml`）注入一个 `[model_providers.opencodex]` 表，并
-  将已路由的模型合并进 Codex 的目录和 subagent 选择器 —— 完全可逆。
+- **无缝接入 Codex CLI、TUI、App 和 SDK。** 向 `$CODEX_HOME/config.toml`（默认 `~/.codex/config.toml`）
+  注入一个 `[model_providers.opencodex]` 表，并写入共享的 Codex 模型目录，让已路由的模型出现在
+  Codex 模型选择器中。
+- **Subagent 控制。** 通过 `subagentModels` 或 Web 仪表盘，将最多 5 个路由或原生模型优先展示在
+  Codex 的 `spawn_agent` 选择器中。
+- **默认 HTTP/SSE，WebSocket 需要显式开启。** 代理有 Responses WebSocket 端点，但只有设置
+  `"websockets": true` 时才会广告 `supports_websockets`。
 - **Sidecars。** 通过基于你 ChatGPT 登录的 `gpt-5.4-mini`，为非 OpenAI 模型提供真正的**网页搜索**和**图像理解**能力。
 - **Web 仪表盘**，用于管理 provider、OAuth 登录、模型选择和请求日志。
 
@@ -110,6 +115,7 @@ ocx login <xai|anthropic|kimi> # OAuth login
 ocx logout <provider>          # remove a stored login
 ocx gui                        # open the web dashboard
 ocx service <install|start|stop|status|uninstall>   # run as a background service
+ocx update                     # update opencodex to the latest published version
 ```
 
 ## 配置
@@ -137,13 +143,18 @@ ocx service <install|start|stop|status|uninstall>   # run as a background servic
 }
 ```
 
+WebSocket 传输默认关闭。只有当你希望 Codex 广告并使用 Responses WebSocket 路径而不是 HTTP/SSE 时，
+才需要设置 `"websockets": true`。
+
 每个字段的说明请参阅 **[配置参考](https://lidge-jun.github.io/opencodex/zh-cn/reference/configuration/)**。
 
 ## 文档
 
-完整的开发者文档 —— 架构、每个 adapter、请求生命周期、sidecars、
-Codex 集成，以及 CLI/配置参考 —— 是位于 [`docs-site/`](./docs-site) 下的一个 Astro 站点，
+公开文档 —— 安装、providers、路由、sidecars、Codex 集成、Codex App 模型选择器，
+以及 CLI/配置参考 —— 是位于 [`docs-site/`](./docs-site) 下的一个 Astro 站点，
 并发布于 **[lidge-jun.github.io/opencodex](https://lidge-jun.github.io/opencodex/zh-cn/)**。
+
+维护者 source of truth 位于 [`structure/`](./structure)，历史调查/诊断笔记保留在 [`docs/`](./docs)。
 
 ## 开发
 

@@ -25,6 +25,19 @@ cd gui && bun install && bun dev
 cd docs-site && bun install && bun dev
 ```
 
+## 문서 배포
+
+공개 문서는 GitHub Pages의 <https://lidge-jun.github.io/opencodex/ko/>에 게시됩니다.
+`.github/workflows/deploy-docs.yml` 워크플로는 `main` 브랜치에서 `docs-site/**` 또는 워크플로
+자체가 바뀔 때 실행되며, `docs-site`를 빌드한 뒤 배포합니다. 문서 변경을 푸시하기 전에 다음을
+실행하세요:
+
+```bash
+cd docs-site
+bun install --frozen-lockfile
+bun run build
+```
+
 ## 컨벤션
 
 - **ES Modules 전용**(`import`/`export`), TypeScript, `strict` 모드. `bun x tsc --noEmit`을 깨끗하게
@@ -33,8 +46,8 @@ cd docs-site && bun install && bun dev
   `index.ts` 뒤에 작고 집중된 모듈을 둔 좋은 예입니다).
 - **비동기 에러는 경계에서 처리** — 사이드카는 요청 경로로 절대 throw하지 않으며, 우아한 마커로
   성능을 낮춥니다.
-- **Devlog** — 설계 노트는 10단위 범위 번호를 사용해 `devlog/NN_slug/`에 둡니다(`00–09` 리서치,
-  `10–19` 1단계, …). 새 작업은 다음 10단위를 받습니다.
+- **Structure SOT** — 현재 유지보수 불변식은 `structure/`에 둡니다. 공개 사용자 워크플로는
+  `docs-site/`, 과거 조사/진단 노트는 `docs/`에 둡니다.
 - **익스포트 보존** — 다른 모듈이 이에 의존할 수 있습니다.
 
 ## 카탈로그에 프로바이더 추가하기

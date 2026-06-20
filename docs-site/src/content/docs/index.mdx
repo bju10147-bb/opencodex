@@ -45,8 +45,13 @@ Codex CLI / App / SDK ──/v1/responses──▶ opencodex ──▶ Any provi
   </Card>
   <Card title="Drops into Codex" icon="rocket">
     `ocx init` injects a provider into `$CODEX_HOME/config.toml` (default
-    `~/.codex/config.toml`) and merges routed models into Codex's catalog and subagent picker.
+    `~/.codex/config.toml`) and writes a shared Codex catalog, so Codex CLI, TUI, App, and SDK
+    all see the same routed models and subagent picks.
     `ocx stop` restores native Codex cleanly.
+  </Card>
+  <Card title="Subagents and transports" icon="puzzle">
+    Pin up to five routed or native models for Codex `spawn_agent`. HTTP/SSE stays the default;
+    Responses WebSocket support is advertised only when `websockets: true`.
   </Card>
   <Card title="Sidecars" icon="magnifier">
     Give non-OpenAI models real **web search** and **image understanding** by routing those
@@ -58,7 +63,7 @@ Codex CLI / App / SDK ──/v1/responses──▶ opencodex ──▶ Any provi
 
 ```bash
 # Install
-bun install -g opencx      # or: npm install -g opencx
+bun install -g @bitkyc08/opencodex      # or: npm install -g @bitkyc08/opencodex
 
 # Interactive setup (writes config + injects into Codex)
 ocx init
@@ -76,5 +81,7 @@ codex "Write a hello world in Rust"
   <LinkCard title="Installation" href="/opencodex/getting-started/installation/" description="Install ocx, prerequisites, and verification." />
   <LinkCard title="How It Works" href="/opencodex/getting-started/how-it-works/" description="The full request lifecycle: parse → route → adapter → bridge → SSE." />
   <LinkCard title="Providers" href="/opencodex/guides/providers/" description="OAuth, API-key catalog, forward/passthrough, and the full provider table." />
+  <LinkCard title="Codex App Model Picker" href="/opencodex/guides/codex-app-models/" description="How routed opencodex models show up in Codex App through the shared catalog." />
+  <LinkCard title="Web Dashboard" href="/opencodex/guides/web-dashboard/" description="Manage providers, OAuth, model visibility, subagents, and logs." />
   <LinkCard title="CLI Reference" href="/opencodex/reference/cli/" description="Every ocx command and flag." />
 </CardGrid>

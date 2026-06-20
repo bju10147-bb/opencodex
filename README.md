@@ -87,9 +87,13 @@ codex -m "ollama-cloud/glm-5.2"      "Write a SQL migration"
 - **OAuth, API key, or ChatGPT forward.** Log in with your xAI / Anthropic / Kimi account (tokens
   auto-refresh), forward your `codex login`, or paste a key (`${ENV_VARS}` supported). An 18-provider
   API-key catalog (incl. **Ollama Cloud**) is built in.
-- **Drops into Codex.** Injects a `[model_providers.opencodex]` table into
-  `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`) and merges routed models into Codex's
-  catalog and subagent picker — fully reversible.
+- **Drops into Codex CLI, TUI, App, and SDK.** Injects a `[model_providers.opencodex]` table into
+  `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`) and writes a shared Codex model catalog
+  so routed models appear in Codex model pickers.
+- **Subagent control.** Feature up to five routed or native models in Codex's `spawn_agent` picker
+  from `subagentModels` or the web dashboard.
+- **HTTP/SSE by default, WebSocket opt-in.** The proxy has a Responses WebSocket endpoint, but it
+  only advertises `supports_websockets` when `"websockets": true` is set.
 - **Sidecars.** Give non-OpenAI models real **web search** and **image understanding** via a
   `gpt-5.4-mini` over your ChatGPT login.
 - **Web dashboard** for providers, OAuth login, model selection, and request logs.
@@ -104,7 +108,7 @@ codex -m "ollama-cloud/glm-5.2"      "Write a SQL migration"
 | xAI Grok | `openai-chat` | oauth / key |
 | Kimi (Moonshot) | `openai-chat` | oauth / key |
 | Google Gemini | `google` | key |
-| Azure OpenAI | `azure-openai` | key |
+| Azure OpenAI | `azure` | key |
 | Ollama Cloud + 17-provider catalog | `openai-chat` | key |
 | Ollama / vLLM / LM Studio (local) | `openai-chat` | key (usually blank) |
 | Any OpenAI-compatible endpoint | `openai-chat` | key |
@@ -150,16 +154,20 @@ Config lives at `~/.opencodex/config.json`. Minimal example:
 }
 ```
 
+WebSocket transport is off by default. Set `"websockets": true` only if you want Codex to advertise
+and use the Responses WebSocket path instead of HTTP/SSE.
+
 See the **[Configuration reference](https://lidge-jun.github.io/opencodex/reference/configuration/)**
 for every field.
 
 ## Documentation
 
-The full developer documentation — architecture, every adapter, the request lifecycle, the sidecars,
-Codex integration, and the CLI/config reference — is an Astro site under [`docs-site/`](./docs-site)
-and published to **[lidge-jun.github.io/opencodex](https://lidge-jun.github.io/opencodex/)**.
-Deep implementation notes live under [`docs/`](./docs), including the Codex App/model catalog path
-that makes routed opencodex models appear in the Codex App picker.
+The public docs — install, providers, routing, sidecars, Codex integration, Codex App model picker,
+and CLI/config reference — are built from [`docs-site/`](./docs-site) and published to
+**[lidge-jun.github.io/opencodex](https://lidge-jun.github.io/opencodex/)**.
+
+Maintainer source-of-truth notes live under [`structure/`](./structure). Historical investigations
+remain under [`docs/`](./docs).
 
 ## Development
 

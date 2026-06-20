@@ -25,12 +25,25 @@ cd gui && bun install && bun dev
 cd docs-site && bun install && bun dev
 ```
 
+## 文档发布
+
+公开文档发布到 GitHub Pages：<https://lidge-jun.github.io/opencodex/zh-cn/>。
+`.github/workflows/deploy-docs.yml` 会在 `main` 分支中 `docs-site/**` 或该 workflow 自身发生变化时运行，
+构建 `docs-site` 并部署生成的网站。推送文档变更前请运行：
+
+```bash
+cd docs-site
+bun install --frozen-lockfile
+bun run build
+```
+
 ## 约定
 
 - **仅使用 ES Modules**(`import`/`export`)、TypeScript、`strict` 模式。保持 `bun x tsc --noEmit` 无报错。
 - **每个文件最多约 500 行** —— 按职责拆分(`web-search/` 和 `vision/` sidecar 就是隐藏在单个 `index.ts` 背后的小而专注模块的良好范例)。
 - **在边界处处理异步错误** —— sidecar 绝不向请求路径抛出异常;它们会优雅地降级为一个标记。
-- **Devlog** —— 设计笔记位于 `devlog/NN_slug/` 中,采用十位区间编号(`00–09` 调研,`10–19` 阶段 1,……)。新的工作使用下一个十位段。
+- **Structure SOT** —— 当前维护者不变量放在 `structure/`。公开用户流程放在 `docs-site/`，
+  历史调查/诊断笔记放在 `docs/`。
 - **保留导出(exports)** —— 其他模块可能依赖它们。
 
 ## 向目录中添加 provider

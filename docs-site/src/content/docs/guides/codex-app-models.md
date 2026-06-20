@@ -36,6 +36,9 @@ wire_api = "responses"
 requires_openai_auth = true
 ```
 
+`websockets` is off by default. opencodex only advertises `supports_websockets = true` in the
+provider table and catalog entries when `"websockets": true` is set.
+
 ## Why routed models show up
 
 Codex's model picker expects Codex-shaped catalog entries. opencodex builds those entries by cloning
@@ -70,6 +73,12 @@ priority
 opencodex preserves that split. Native OpenAI passthrough models keep fast support; routed
 non-OpenAI models strip service-tier metadata so the fast option is not advertised where it cannot
 be honored.
+
+## Subagent selection
+
+Codex's `spawn_agent` advertises the highest-priority first 5 catalog models. Pick up to five
+`provider/model` or native ids through `subagentModels` or the web dashboard; opencodex sorts those
+entries to the front of the shared catalog.
 
 ## Refreshing model state
 

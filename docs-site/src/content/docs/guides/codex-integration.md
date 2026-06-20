@@ -14,12 +14,15 @@ idempotent and reversible.
 ```toml
 # at the document root — Codex reads this as the active provider
 model_provider = "opencodex"
+model_catalog_json = "/absolute/path/to/opencodex-catalog.json"
 
 # appended at end of file (TOML tables are position-independent)
 [model_providers.opencodex]
 name = "OpenCodex Proxy"
 base_url = "http://localhost:10100/v1"
 wire_api = "responses"
+requires_openai_auth = true
+# supports_websockets = true   # only when config.websockets is true
 ```
 
 It also writes an optional profile at `$CODEX_HOME/opencodex.config.toml` so you can opt in explicitly:
@@ -33,6 +36,22 @@ The root `model_provider` key **must** sit before the first `[table]` header, or
 part of a table and ignores it. The injector guarantees this placement and strips any stray or
 duplicate copies before re-writing — so re-running `ocx init` / `ocx sync` never produces duplicates.
 :::
+
+## Shared model catalog
+
+Codex CLI, TUI, App, and SDK all read the same Codex home. opencodex resolves that directory from
+`CODEX_HOME`, falling back to `~/.codex`, and manages:
+
+```text
+$CODEX_HOME/config.toml
+$CODEX_HOME/opencodex.config.toml
+$CODEX_HOME/opencodex-catalog.json
+$CODEX_HOME/models_cache.json
+```
+
+`requires_openai_auth = true` keeps Codex App/TUI account-gated surfaces aligned with native Codex.
+WebSocket transport is different: opencodex serves `/v1/responses` over WebSocket, but only advertises
+`supports_websockets = true` when `"websockets": true` is set in `~/.opencodex/config.json`.
 
 ## Model catalog sync
 

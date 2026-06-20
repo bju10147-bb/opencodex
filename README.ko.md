@@ -77,8 +77,13 @@ codex -m "ollama-cloud/glm-5.2"      "Write a SQL migration"
 - **OAuth, API 키, 또는 ChatGPT forward.** xAI / Anthropic / Kimi 계정으로 로그인하거나(토큰은
   자동 갱신됩니다), `codex login`을 forward 하거나, 키를 붙여넣으세요(`${ENV_VARS}` 지원). 18개 프로바이더의
   API 키 카탈로그(**Ollama Cloud** 포함)가 기본 내장되어 있습니다.
-- **Codex에 바로 통합.** `$CODEX_HOME/config.toml`(기본값 `~/.codex/config.toml`)에 `[model_providers.opencodex]` 테이블을 주입하고
-  라우팅된 모델을 Codex의 카탈로그와 서브에이전트 선택기에 병합합니다 — 완전히 되돌릴 수 있습니다.
+- **Codex CLI, TUI, App, SDK에 바로 통합.** `$CODEX_HOME/config.toml`(기본값 `~/.codex/config.toml`)에
+  `[model_providers.opencodex]` 테이블을 주입하고 공유 Codex 모델 카탈로그를 작성하여 라우팅된 모델이
+  Codex 모델 선택기에 표시되게 합니다.
+- **서브에이전트 제어.** `subagentModels` 또는 웹 대시보드에서 최대 5개의 라우팅/네이티브 모델을
+  Codex `spawn_agent` 선택기에 우선 노출할 수 있습니다.
+- **기본은 HTTP/SSE, WebSocket은 opt-in.** 프록시는 Responses WebSocket 엔드포인트를 갖고 있지만,
+  `"websockets": true`일 때만 `supports_websockets`를 광고합니다.
 - **Sidecar.** OpenAI가 아닌 모델에도 ChatGPT 로그인을 통한 `gpt-5.4-mini`를 사용해 실제 **웹 검색**과
   **이미지 이해** 기능을 제공합니다.
 - 프로바이더, OAuth 로그인, 모델 선택, 요청 로그를 위한 **웹 대시보드**.
@@ -111,6 +116,7 @@ ocx login <xai|anthropic|kimi> # OAuth login
 ocx logout <provider>          # remove a stored login
 ocx gui                        # open the web dashboard
 ocx service <install|start|stop|status|uninstall>   # run as a background service
+ocx update                     # update opencodex to the latest published version
 ```
 
 ## 설정
@@ -138,14 +144,20 @@ ocx service <install|start|stop|status|uninstall>   # run as a background servic
 }
 ```
 
+WebSocket 전송은 기본적으로 꺼져 있습니다. Codex가 HTTP/SSE 대신 Responses WebSocket 경로를 광고하고
+사용하게 하려면 `"websockets": true`를 명시하세요.
+
 모든 필드에 대한 자세한 내용은 **[설정 레퍼런스](https://lidge-jun.github.io/opencodex/ko/reference/configuration/)**
 를 참고하세요.
 
 ## 문서
 
-전체 개발자 문서 — 아키텍처, 모든 adapter, 요청 라이프사이클, sidecar,
-Codex 통합, CLI/설정 레퍼런스 — 는 [`docs-site/`](./docs-site) 아래의 Astro 사이트이며
+공개 문서 — 설치, 프로바이더, 라우팅, sidecar, Codex 통합, Codex App 모델 선택기,
+CLI/설정 레퍼런스 — 는 [`docs-site/`](./docs-site) 아래의 Astro 사이트이며
 **[lidge-jun.github.io/opencodex](https://lidge-jun.github.io/opencodex/ko/)**에 게시됩니다.
+
+유지보수용 source of truth는 [`structure/`](./structure)에 있고, 과거 조사/진단 노트는
+[`docs/`](./docs)에 남아 있습니다.
 
 ## 개발
 

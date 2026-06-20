@@ -42,8 +42,13 @@ Codex CLI / App / SDK ──/v1/responses──▶ opencodex ──▶ Any provi
     포워딩하거나, API 키를 붙여넣으세요. 키는 `${ENV_VARS}`로 지정할 수 있습니다.
   </Card>
   <Card title="Codex에 바로 연결" icon="rocket">
-    `ocx init`은 프로바이더를 `$CODEX_HOME/config.toml`(기본값 `~/.codex/config.toml`)에 주입하고, 라우팅된 모델을 Codex의
-    카탈로그와 subagent 선택기에 병합합니다. `ocx stop`은 네이티브 Codex를 깔끔하게 복원합니다.
+    `ocx init`은 프로바이더를 `$CODEX_HOME/config.toml`(기본값 `~/.codex/config.toml`)에 주입하고,
+    공유 Codex 카탈로그를 작성하여 Codex CLI, TUI, App, SDK가 같은 라우팅 모델과 subagent 선택을 보게 합니다.
+    `ocx stop`은 네이티브 Codex를 깔끔하게 복원합니다.
+  </Card>
+  <Card title="서브에이전트와 전송 방식" icon="puzzle">
+    Codex `spawn_agent`에 최대 5개의 라우팅/네이티브 모델을 우선 노출할 수 있습니다.
+    기본 전송은 HTTP/SSE이며, Responses WebSocket은 `websockets: true`일 때만 광고됩니다.
   </Card>
   <Card title="Sidecar" icon="magnifier">
     OpenAI가 아닌 모델에도 실제 **웹 검색**과 **이미지 이해** 기능을 제공하세요. 해당 기능들을
@@ -55,7 +60,7 @@ Codex CLI / App / SDK ──/v1/responses──▶ opencodex ──▶ Any provi
 
 ```bash
 # Install
-bun install -g opencx      # or: npm install -g opencx
+bun install -g @bitkyc08/opencodex      # or: npm install -g @bitkyc08/opencodex
 
 # Interactive setup (writes config + injects into Codex)
 ocx init
@@ -73,5 +78,7 @@ codex "Write a hello world in Rust"
   <LinkCard title="설치" href="/opencodex/ko/getting-started/installation/" description="ocx 설치, 사전 요구 사항, 동작 확인." />
   <LinkCard title="작동 방식" href="/opencodex/ko/getting-started/how-it-works/" description="전체 요청 수명 주기: parse → route → adapter → bridge → SSE." />
   <LinkCard title="프로바이더" href="/opencodex/ko/guides/providers/" description="OAuth, API 키 카탈로그, forward/passthrough, 그리고 전체 프로바이더 표." />
+  <LinkCard title="Codex App 모델 선택기" href="/opencodex/ko/guides/codex-app-models/" description="라우팅된 opencodex 모델이 공유 카탈로그를 통해 Codex App에 표시되는 방식." />
+  <LinkCard title="웹 대시보드" href="/opencodex/ko/guides/web-dashboard/" description="프로바이더, OAuth, 모델 표시 여부, 서브에이전트, 로그를 관리합니다." />
   <LinkCard title="CLI 레퍼런스" href="/opencodex/ko/reference/cli/" description="모든 ocx 명령어와 플래그." />
 </CardGrid>

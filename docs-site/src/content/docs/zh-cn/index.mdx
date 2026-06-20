@@ -42,8 +42,13 @@ Codex CLI / App / SDK ──/v1/responses──▶ opencodex ──▶ Any provi
     登录凭据,或粘贴一个 API key。Key 可以是 `${ENV_VARS}`。
   </Card>
   <Card title="无缝接入 Codex" icon="rocket">
-    `ocx init` 会向 `$CODEX_HOME/config.toml`（默认 `~/.codex/config.toml`）注入一个 provider,并将已路由的模型合并进 Codex 的
-    目录与 subagent 选择器。`ocx stop` 可干净地恢复原生 Codex。
+    `ocx init` 会向 `$CODEX_HOME/config.toml`（默认 `~/.codex/config.toml`）注入一个 provider,
+    并写入共享的 Codex 目录，让 Codex CLI、TUI、App 和 SDK 看到同一组路由模型与 subagent 选择。
+    `ocx stop` 可干净地恢复原生 Codex。
+  </Card>
+  <Card title="Subagent 与传输方式" icon="puzzle">
+    最多可将 5 个路由或原生模型优先展示给 Codex `spawn_agent`。
+    默认传输是 HTTP/SSE；只有设置 `websockets: true` 时才会广告 Responses WebSocket。
   </Card>
   <Card title="Sidecar" icon="magnifier">
     通过你的 ChatGPT 登录凭据,借助 `gpt-5.4-mini` sidecar 路由相关能力,
@@ -55,7 +60,7 @@ Codex CLI / App / SDK ──/v1/responses──▶ opencodex ──▶ Any provi
 
 ```bash
 # Install
-bun install -g opencx      # or: npm install -g opencx
+bun install -g @bitkyc08/opencodex      # or: npm install -g @bitkyc08/opencodex
 
 # Interactive setup (writes config + injects into Codex)
 ocx init
@@ -73,5 +78,7 @@ codex "Write a hello world in Rust"
   <LinkCard title="安装" href="/opencodex/zh-cn/getting-started/installation/" description="安装 ocx、前置条件以及验证。" />
   <LinkCard title="工作原理" href="/opencodex/zh-cn/getting-started/how-it-works/" description="完整的请求生命周期:解析 → 路由 → adapter → 桥接 → SSE。" />
   <LinkCard title="Provider" href="/opencodex/zh-cn/guides/providers/" description="OAuth、API key 目录、转发/直通,以及完整的 provider 列表。" />
+  <LinkCard title="Codex App 模型选择器" href="/opencodex/zh-cn/guides/codex-app-models/" description="路由后的 opencodex 模型如何通过共享目录出现在 Codex App 中。" />
+  <LinkCard title="Web 仪表盘" href="/opencodex/zh-cn/guides/web-dashboard/" description="管理 providers、OAuth、模型可见性、subagent 与日志。" />
   <LinkCard title="CLI 参考" href="/opencodex/zh-cn/reference/cli/" description="每一个 ocx 命令与参数。" />
 </CardGrid>

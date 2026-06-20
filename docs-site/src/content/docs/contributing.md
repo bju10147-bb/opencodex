@@ -25,6 +25,19 @@ The docs site you're reading lives in `docs-site/` (Astro + Starlight):
 cd docs-site && bun install && bun dev
 ```
 
+## Docs publishing
+
+The public docs publish to GitHub Pages at <https://lidge-jun.github.io/opencodex/>. The
+`.github/workflows/deploy-docs.yml` workflow runs on `main` pushes that touch `docs-site/**` or the
+workflow itself, builds `docs-site`, and deploys the generated site. Before pushing docs changes,
+run:
+
+```bash
+cd docs-site
+bun install --frozen-lockfile
+bun run build
+```
+
 ## Conventions
 
 - **ES Modules only** (`import`/`export`), TypeScript, `strict` mode. Keep `bun x tsc --noEmit` clean.
@@ -32,8 +45,8 @@ cd docs-site && bun install && bun dev
   good examples of small, focused modules behind a single `index.ts`).
 - **Handle async errors at boundaries** — sidecars never throw into the request path; they degrade to
   a graceful marker.
-- **Devlog** — design notes live in `devlog/NN_slug/` with decade-range numbering (`00–09` research,
-  `10–19` phase 1, …). New work gets the next decade.
+- **Structure SOT** — current maintainer invariants live in `structure/`. Keep public user workflows
+  in `docs-site/` and historical investigation notes in `docs/`.
 - **Preserve exports** — other modules may depend on them.
 
 ## Adding a provider to the catalog

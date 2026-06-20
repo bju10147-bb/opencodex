@@ -16,6 +16,7 @@ opencodex는 `~/.opencodex/config.json`으로 설정됩니다. 이 파일은 `oc
 | `defaultProvider` | `string` | `"openai"` | 라우팅에서 더 나은 매치를 찾지 못했을 때 사용하는 프로바이더. |
 | `subagentModels?` | `string[]` | — | Codex의 서브에이전트 선택기에서 가장 먼저 노출되는 최대 5개의 `provider/model` id. |
 | `disabledModels?` | `string[]` | — | Codex에서 숨겨지는 라우팅된 `provider/model` id (카탈로그와 `/v1/models`에서 제외됨). |
+| `websockets?` | `boolean` | `false` | Codex가 Responses WebSocket 경로를 사용하도록 `supports_websockets`를 광고합니다. 생략하거나 `false`로 두면 HTTP/SSE를 유지합니다. |
 | `modelCacheTtlMs?` | `number` | `300000` | 프로바이더별 `/models` 캐시의 유효 기간 (5분). |
 | `webSearchSidecar?` | `OcxWebSearchSidecarConfig` | on | 웹 검색 사이드카 옵션 (아래 참조). |
 | `visionSidecar?` | `OcxVisionSidecarConfig` | on | 비전 사이드카 옵션 (아래 참조). |
@@ -82,6 +83,7 @@ opencodex는 `~/.opencodex/config.json`으로 설정됩니다. 이 파일은 `oc
   },
   "subagentModels": ["anthropic/claude-opus-4-8", "ollama-cloud/glm-5.2"],
   "disabledModels": [],
+  "websockets": false,
   "webSearchSidecar": { "maxSearchesPerTurn": 3 },
   "visionSidecar": { "enabled": true }
 }

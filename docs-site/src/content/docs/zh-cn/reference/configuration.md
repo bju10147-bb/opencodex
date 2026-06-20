@@ -14,6 +14,7 @@ opencodex 通过 `~/.opencodex/config.json` 进行配置。它由 `ocx init` 和
 | `defaultProvider` | `string` | `"openai"` | 当路由找不到更优匹配时使用的 provider。 |
 | `subagentModels?` | `string[]` | — | 最多 5 个 `provider/model` id,会在 Codex 的 subagent 选择器中优先展示。 |
 | `disabledModels?` | `string[]` | — | 从 Codex 中隐藏的已路由 `provider/model` id(从目录和 `/v1/models` 中排除)。 |
+| `websockets?` | `boolean` | `false` | 广告 `supports_websockets`，让 Codex 使用 Responses WebSocket 路径。省略或设为 `false` 会保持 HTTP/SSE。 |
 | `modelCacheTtlMs?` | `number` | `300000` | 每个 provider 的 `/models` 缓存的有效期(5 分钟)。 |
 | `webSearchSidecar?` | `OcxWebSearchSidecarConfig` | 开启 | 网络搜索 sidecar 选项(见下文)。 |
 | `visionSidecar?` | `OcxVisionSidecarConfig` | 开启 | 视觉 sidecar 选项(见下文)。 |
@@ -80,6 +81,7 @@ opencodex 通过 `~/.opencodex/config.json` 进行配置。它由 `ocx init` 和
   },
   "subagentModels": ["anthropic/claude-opus-4-8", "ollama-cloud/glm-5.2"],
   "disabledModels": [],
+  "websockets": false,
   "webSearchSidecar": { "maxSearchesPerTurn": 3 },
   "visionSidecar": { "enabled": true }
 }

@@ -1,51 +1,51 @@
 # opencodex Structure
 
-This folder records the implementation map for maintainers. It is intentionally shorter than
-`devlog/`: devlog records decisions over time; `structure/` records the current shape of the system.
+This folder is the maintainer source of truth for the current system shape. Public user workflows
+belong in `docs-site/`; historical investigations belong in `docs/`.
 
-## Main runtime
+## Reading order
 
-| Path | Responsibility |
-|---|---|
-| `src/cli.ts` | CLI entrypoint for `ocx` / `opencodex`; setup, service, sync, login, restore. |
-| `src/server.ts` | Bun proxy server, management API, `/v1/responses`, `/v1/models`. |
-| `src/router.ts` | Provider/model resolution before adapter dispatch. |
-| `src/types.ts` | Shared config, provider, request, and adapter event types. |
-| `src/config.ts` | `~/.opencodex/config.json` read/write and atomic writes. |
+| Folder | Purpose |
+| --- | --- |
+| [`runtime/`](runtime/) | Process lifecycle, CLI, server endpoints, config, providers, adapters, GUI API. |
+| [`codex/`](codex/) | `CODEX_HOME`, config injection, shared catalog, Codex App, subagent ordering. |
+| [`transports/`](transports/) | Responses HTTP/SSE, optional WebSocket advertisement, sidecars, native passthrough. |
+| [`docs-release/`](docs-release/) | Public docs site, GitHub Pages publishing, release/build ownership. |
 
-## Codex integration
+## Product boundary
 
-| Path | Responsibility |
-|---|---|
-| `src/codex-paths.ts` | Resolve `CODEX_HOME`, config path, profile path, catalog path, and cache path. |
-| `src/codex-inject.ts` | Inject/strip `model_provider`, provider table, profile file, fast-mode feature. |
-| `src/codex-catalog.ts` | Merge routed models into Codex-shaped catalog entries and restore native catalog. |
-| `src/service.ts` | launchd, systemd user unit, and Windows Task Scheduler service integration. |
-| `src/open-url.ts` | Cross-platform browser opener for OAuth, GUI, and prompts. |
+opencodex is a local Responses-compatible proxy for Codex. It does not patch Codex binaries. It
+changes local Codex state by writing a provider table and model catalog, then serves:
 
-## Providers and adapters
+```text
+Codex CLI / TUI / App / SDK
+  -> http://localhost:<port>/v1/responses
+  -> opencodex routing + adapter bridge
+  -> upstream provider
+```
 
-| Path | Responsibility |
-|---|---|
-| `src/adapters/` | Provider wire adapters and stream bridges. |
-| `src/oauth/` | OAuth flows, token storage, refresh, and auth-token resolution. |
-| `src/oauth/key-providers.ts` | API-key provider catalog and provider defaults. |
-| `src/model-cache.ts` | Provider `/models` cache with fresh/stale fallback. |
+The default install keeps native OpenAI/ChatGPT passthrough working through the `openai` forward
+provider. Additional providers are routed by explicit `provider/model`, provider model lists, or the
+configured `defaultProvider`.
 
-## GUI and docs
+## Local state
 
-| Path | Responsibility |
-|---|---|
-| `gui/` | React dashboard for provider setup, OAuth login, model visibility, and logs. |
-| `docs-site/` | Astro/Starlight public documentation site. |
-| `docs/` | Technical investigation notes and implementation references. |
-| `devlog/` | Time-ordered implementation plans, decisions, and verification records. |
+| Path | Owner | Notes |
+| --- | --- | --- |
+| `~/.opencodex/config.json` | opencodex | Main config written by `ocx init` and the dashboard. |
+| `~/.opencodex/auth.json` | opencodex | OAuth tokens; not committed. |
+| `~/.opencodex/catalog-backup.json` | opencodex | One-time pristine Codex catalog backup for restore. |
+| `$CODEX_HOME/config.toml` | Codex, edited by opencodex | Active provider and provider table. |
+| `$CODEX_HOME/opencodex.config.toml` | opencodex | Optional profile for explicit Codex opt-in. |
+| `$CODEX_HOME/opencodex-catalog.json` | opencodex | Shared native+routed model catalog. |
+| `$CODEX_HOME/models_cache.json` | Codex, invalidated by opencodex | Cache invalidated after model/catalog changes. |
+| `dist/`, `gui/dist/`, `node_modules/` | generated | Build output/dependencies. |
 
-## Generated/local state
+## Non-negotiable invariants
 
-| Path | Responsibility |
-|---|---|
-| `dist/` | Local build/bin output; ignored by git. |
-| `node_modules/` | Local dependencies; ignored by git. |
-| `~/.opencodex/` | User opencodex config, auth tokens, pid files, logs, catalog backup. |
-| `$CODEX_HOME/` | Codex config, profile, catalog, and model cache touched by opencodex. |
+- `websockets` defaults to `false`; only `true` advertises `supports_websockets`.
+- `CODEX_HOME` wins over `~/.codex` when present and valid.
+- Root TOML keys such as `model_provider` and `model_catalog_json` must stay before any table.
+- Routed model slugs use `provider/model`.
+- Codex `spawn_agent` visibility depends on the first five featured catalog entries.
+- `ocx stop`, `ocx restore`, and service stop/uninstall must leave native Codex usable.
