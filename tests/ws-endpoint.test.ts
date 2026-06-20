@@ -131,6 +131,34 @@ describe("WS endpoint re-framer (120/132)", () => {
     expect(sent).toEqual([]);
   });
 
+  test("stale pump cleanup does not erase the replacement turn cancel hook", async () => {
+    const { ws } = mockWs();
+    let current = false;
+    const stalePump = pumpResponsesSseToWebSocket(ws, sseStream([
+      'event: response.created\ndata: {"type":"response.created"}\n\n',
+    ]), { isCurrent: () => current });
+    const replacementCancel = () => {};
+    ws.data.cancel = replacementCancel;
+    await stalePump;
+    expect(ws.data.cancel).toBe(replacementCancel);
+  });
+
+  test("invalid upstream SSE JSON emits one standalone protocol error and cancels", async () => {
+    const { ws, sent } = mockWs();
+    let cancelled = false;
+    await pumpResponsesSseToWebSocket(ws, sseStream([
+      "event: response.created\ndata: {not-json}\n\n",
+      'event: response.completed\ndata: {"type":"response.completed"}\n\n',
+    ], () => { cancelled = true; }));
+    expect(sent).toHaveLength(1);
+    expect(JSON.parse(sent[0])).toMatchObject({
+      type: "error",
+      status: 502,
+      error: { code: "websocket_protocol_error" },
+    });
+    expect(cancelled).toBe(true);
+  });
+
   test("converts successful Responses JSON into output_item.done plus response.completed frames", () => {
     const { ws, sent } = mockWs();
     sendResponsesJsonAsEvents(ws, {

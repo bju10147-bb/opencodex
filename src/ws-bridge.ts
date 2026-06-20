@@ -140,9 +140,10 @@ export async function pumpResponsesSseToWebSocket(
 ): Promise<void> {
   const reader = sseStream.getReader();
   const isCurrent = options.isCurrent ?? (() => true);
-  ws.data.cancel = () => {
+  const cancel = () => {
     void reader.cancel().catch(() => {});
   };
+  ws.data.cancel = cancel;
 
   const decoder = new TextDecoder();
   let buffer = "";
@@ -154,6 +155,8 @@ export async function pumpResponsesSseToWebSocket(
     const type = payloadType(payload);
     if (!type) {
       sendProtocolError(ws, 502, "Invalid JSON payload in upstream SSE frame");
+      terminalSeen = true;
+      void reader.cancel().catch(() => {});
       return true;
     }
     if (terminalSeen) return true;
@@ -191,7 +194,7 @@ export async function pumpResponsesSseToWebSocket(
       sendProtocolError(ws, 502, err instanceof Error ? err.message : String(err));
     }
   } finally {
-    if (ws.data.cancel) ws.data.cancel = undefined;
+    if (ws.data.cancel === cancel) ws.data.cancel = undefined;
   }
 }
 
